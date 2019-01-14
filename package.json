@@ -1,0 +1,9 @@
+{
+  "name": "exrepl",
+  "version": "0.0.1",
+  "description": "easy node repl",
+  "main": "repl.js",
+  "repository": "limfa/exrepl",
+  "author": "limfa@qq.com",
+  "license": "MIT"
+}
