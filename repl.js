@@ -82,7 +82,12 @@ async function myEval(cmd, context, filename, callback) {
   cmd = `
   with (new Proxy(global, {
     async set(target, key, value, ...args) {
-      value = await value
+      if (
+        typeof value.then === 'function' &&
+        typeof value.catch === 'function'
+      ) {
+        value = await value
+      }
       return Reflect.set(target, key, value, ...args)
     },
     has(target, key, ...args) {
@@ -91,7 +96,10 @@ async function myEval(cmd, context, filename, callback) {
     get(target, key, ...args) {
       let value = Reflect.get(target, key, ...args)
       if (typeof value === 'function') {
-        return (...args) => {
+        return function (...args)   {
+          if(new.target){
+            return new value(...args)
+          }
           let result = value(...args)
           if (
             typeof result.then === 'function' &&
@@ -99,10 +107,13 @@ async function myEval(cmd, context, filename, callback) {
           ) {
             const proxy = new Proxy(result, {
               get(target, key, ...args) {
-                if (key in target) {
-                  return Reflect.get(target, key, ...args)
+                if (key in result) {
+                  if(key === 'then' || key === 'catch'){
+                    return (...args)=>result[key](...args)
+                  }
+                  return Reflect.get(result, key, ...args)
                 }
-                return target.then(v => v[key])
+                return result.then(v => v[key])
               }
             })
             proxy[Symbol.iterator] = function*() {
