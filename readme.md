@@ -29,6 +29,7 @@ exrepl
 
 0. 支持 promise 函数链式调用
 1. 测试用例
+1. require().<tab> 报错
 
 ## usage
 

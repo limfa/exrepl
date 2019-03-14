@@ -158,7 +158,11 @@ module.exports = ({ init = () => {} } = {}) => {
     prompt: '> ',
     eval: (cmd, ...args) => {
       if (cmd.trim()) {
-        history.put(cmd)
+        // filter <tab>
+        if (/^try \{ .* \} catch \(e\) {}$/.test(cmd)) {
+        } else {
+          history.put(cmd)
+        }
       }
       return myEval(cmd, ...args)
     },
@@ -188,12 +192,14 @@ module.exports = ({ init = () => {} } = {}) => {
   }
   process.stdin.on('keypress', keypressEvent)
 
-  rpl.context.R = p => {
+  rpl.context.require = (p, ...args) => {
     if (/^\.\.?[/\\]/.test(p)) {
       p = path.join(path.dirname(require.main.filename), p)
     }
-    require.cache[require.resolve(p)] = null
-    return require(p)
+    for (const k in require.cache) {
+      delete require.cache[k]
+    }
+    return require(p, ...args)
   }
   init(rpl.context)
   rpl.on('reset', init).on('exit', () => {
