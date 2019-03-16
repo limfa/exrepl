@@ -201,6 +201,18 @@ module.exports = ({ init = () => {} } = {}) => {
     }
     return require(p, ...args)
   }
+  const _g = rpl.context.global
+  const g = new Proxy(_g, {
+    set(o, k, v, ...args) {
+      global[k] = v
+      return Reflect.set(o, k, v, ...args)
+    },
+    delete(o, k, ...args) {
+      delete global[k]
+      return Reflect.delete(o, k, ...args)
+    }
+  })
+  rpl.context.global = g
   init(rpl.context)
   rpl.on('reset', init).on('exit', () => {
     process.stdin.off('keypress', keypressEvent)
