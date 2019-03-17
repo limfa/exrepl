@@ -192,15 +192,17 @@ module.exports = ({ init = () => {} } = {}) => {
   }
   process.stdin.on('keypress', keypressEvent)
 
-  rpl.context.require = (p, ...args) => {
-    if (/^\.\.?[/\\]/.test(p)) {
-      p = path.join(path.dirname(require.main.filename), p)
+  rpl.context.require = new Proxy(require, {
+    apply(target, thisArg, [p, ...args]) {
+      if (/^\.\.?[/\\]/.test(p)) {
+        p = path.join(process.cwd(), p)
+      }
+      for (const k in require.cache) {
+        delete require.cache[k]
+      }
+      return require(p, ...args)
     }
-    for (const k in require.cache) {
-      delete require.cache[k]
-    }
-    return require(p, ...args)
-  }
+  })
   const _g = rpl.context.global
   const g = new Proxy(_g, {
     set(o, k, v, ...args) {
