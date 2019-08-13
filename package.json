@@ -1,6 +1,6 @@
 {
   "name": "exrepl",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "easy node repl",
   "main": "repl.js",
   "repository": "limfa/exrepl",
