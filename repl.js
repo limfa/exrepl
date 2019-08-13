@@ -96,7 +96,7 @@ async function myEval(cmd, context, filename, callback) {
     get(target, key, ...args) {
       let value = Reflect.get(target, key, ...args)
       if (typeof value === 'function') {
-        return function (...args)   {
+        const f = function (...args)   {
           if(new.target){
             return new value(...args)
           }
@@ -126,6 +126,8 @@ async function myEval(cmd, context, filename, callback) {
           }
           return result
         }
+        Object.setPrototypeOf(f, value)
+        return f
       }
       return value
     }
@@ -159,7 +161,7 @@ module.exports = ({ init = () => {} } = {}) => {
     eval: (cmd, ...args) => {
       if (cmd.trim()) {
         // filter <tab>
-        if (/^try \{ .* \} catch \(e\) {}$/.test(cmd)) {
+        if (/^try +\{.*?\} +catch( +\(.*?\))? +{}$/.test(cmd)) {
         } else {
           history.put(cmd)
         }
