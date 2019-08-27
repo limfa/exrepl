@@ -214,6 +214,11 @@ module.exports = ({ init = () => {} } = {}) => {
     delete(o, k, ...args) {
       delete global[k]
       return Reflect.delete(o, k, ...args)
+    },
+    get(o, k, ...args) {
+      const res = Reflect.get(o, k, ...args)
+      if (res === void 0) return global[k]
+      return res
     }
   })
   rpl.context.global = g
